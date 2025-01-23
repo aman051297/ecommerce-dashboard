@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../services/product.service';
 import { ProductCardComponent } from '../product-card/product-card.component';
@@ -12,8 +12,10 @@ import { ProductCardComponent } from '../product-card/product-card.component';
 })
 export class ProductListComponent implements OnInit {
   products: any[] = [];
-  filteredProducts: any[] = [];
-  isLoading = true;
+  displayedProducts: any[] = []; // Products currently displayed
+  isLoading = false;
+  itemsPerPage = 10; // Number of items to load per "page"
+  currentPage = 0;
 
   constructor(private productService: ProductService) {}
 
@@ -22,11 +24,11 @@ export class ProductListComponent implements OnInit {
   }
 
   fetchProducts(): void {
-    console.log("fetchProducts")
+    this.isLoading = true;
     this.productService.getProducts().subscribe({
       next: (data) => {
         this.products = data;
-        this.filteredProducts = [...this.products]; // Clone for sorting/filtering
+        this.loadMoreProducts(); // Load initial products
         this.isLoading = false;
       },
       error: () => {
@@ -36,11 +38,32 @@ export class ProductListComponent implements OnInit {
     });
   }
 
+  loadMoreProducts(): void {
+    const nextPage = this.products.slice(
+      this.currentPage * this.itemsPerPage,
+      (this.currentPage + 1) * this.itemsPerPage
+    );
+    this.displayedProducts.push(...nextPage);
+    this.currentPage++;
+  }
+
+  @HostListener('window:scroll', ['$event'])
+  onScroll(): void {
+    const threshold = 300; // Trigger load when 300px from bottom
+    const position = window.innerHeight + window.scrollY;
+    const height = document.body.scrollHeight;
+
+    if (position >= height - threshold && !this.isLoading) {
+      this.loadMoreProducts();
+    }
+  }
+
+  
   onSortChange(sortBy: string): void {
     if (sortBy === 'priceAsc') {
-      this.filteredProducts.sort((a, b) => a.price - b.price);
+      this.displayedProducts.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'priceDesc') {
-      this.filteredProducts.sort((a, b) => b.price - a.price);
+      this.displayedProducts.sort((a, b) => b.price - a.price);
     }
   }
 }

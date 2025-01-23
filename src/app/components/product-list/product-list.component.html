@@ -1,7 +1,9 @@
-<div *ngIf="isLoading">Loading products...</div>
-<div class="product-list" *ngIf="!isLoading">
+<div class="product-list">
   <app-product-card
-    *ngFor="let product of filteredProducts"
+    *ngFor="let product of displayedProducts"
     [product]="product"
   ></app-product-card>
+</div>
+<div *ngIf="isLoading" class="loading-spinner">
+  Loading more products...
 </div>
