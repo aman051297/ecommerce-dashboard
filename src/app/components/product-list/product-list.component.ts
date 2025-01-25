@@ -16,6 +16,17 @@ export class ProductListComponent implements OnInit {
   isLoading = false;
   itemsPerPage = 10; // Number of items to load per "page"
   currentPage = 0;
+  isModalVisible = false; 
+  selectedProduct = {
+    name: '',
+    description: '',
+    title: '',
+    image: '',
+    rating: {
+      rate:'',
+      count:''
+    }
+  }
 
   constructor(private productService: ProductService) {}
 
@@ -66,4 +77,24 @@ export class ProductListComponent implements OnInit {
       this.displayedProducts.sort((a, b) => b.price - a.price);
     }
   }
+
+  showModal(product: any) {
+    this.selectedProduct = product;
+    this.isModalVisible = true;
+  }
+
+  // Hide the modal
+  hideModal() {
+    this.isModalVisible = false;
+    this.selectedProduct =  {
+    name: '',
+    description: '',
+    title: '',
+    image: '',
+    rating: {
+    rate:'',
+      count:''
+    }
+  }
+}
 }
