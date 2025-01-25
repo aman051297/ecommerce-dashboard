@@ -76,6 +76,12 @@ export class ProductListComponent implements OnInit {
     } else if (sortBy === 'priceDesc') {
       this.displayedProducts.sort((a, b) => b.price - a.price);
     }
+    else if (sortBy === 'ratingAsc') {
+      this.displayedProducts.sort((a, b) => a.rating.rate - b.rating.rate);
+    }
+    else if (sortBy === 'ratingDesc') {
+      this.displayedProducts.sort((a, b) => b.rating.rate - a.rating.rate);
+    }
   }
 
   showModal(product: any) {
