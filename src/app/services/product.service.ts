@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -7,56 +7,58 @@ import { catchError, map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class ProductService {
-  private apiUrl = 'https://fakestoreapi.com/products'; //  API URL
+  private apiUrl = 'https://dummyjson.com/products'; // API endpoint for products
 
   constructor(private http: HttpClient) {}
 
-  // getProducts(): Observable<any[]> {
-  //   return this.http.get<any[]>(this.apiUrl).pipe(
-  //     map((data) => {
-  //       // Check if the response data is empty
-  //       if (data && data.length > 0) {
-  //         return data; // Return the actual data if available
-  //       } else {
-  //         // Return dummy data if no actual data is found
-  //         return this.getDummyData();
-  //       }
-  //     }),
-  //     catchError((error) => {
-  //       console.error('Error fetching products:', error);
-  //       // Return dummy data on error
-  //       return of(this.getDummyData());
-  //     })
-  //   );
-  // }
+  /**
+   * Fetch products with pagination.
+   * @param page - Current page number (1-indexed).
+   * @param limit - Number of products per page.
+   * @returns Observable of products data.
+   */
+  getProducts(page: number, limit: number): Observable<any> {
+    const skip = (page - 1) * limit; // Calculate the skip value based on page and limit
+    const url = `${this.apiUrl}?limit=${limit}&skip=${skip}`;
 
-  getProducts(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl).pipe(
-      map((data) => {
-        // Check if the response data is empty
-        if (data && data.length > 0) {
-          return data; // Return the actual data if available
+    return this.http.get<any>(url).pipe(
+      map((response) => {
+        if (response && response.products && response.products.length > 0) {
+          return response; // Return the response with products and total count
         } else {
-          // Return dummy data if no actual data is found
-          return this.getDummyData();
+          return { products: this.getDummyData(), total: 0 }; // Dummy data if empty
         }
       }),
       catchError((error) => {
         console.error('Error fetching products:', error);
-        // Return dummy data on error
-        return of(this.getDummyData());
+        return of({ products: this.getDummyData(), total: 0 }); // Return dummy data on error
       })
     );
   }
 
-  // Dummy data with basic details
+  /**
+   * Generate dummy data for fallback.
+   * @returns Array of dummy product data.
+   */
   private getDummyData(): any[] {
     return [
-      { id: 1, name: 'Dummy Product 1', price: 100, category: 'Electronics' },
-      { id: 2, name: 'Dummy Product 2', price: 200, category: 'Home Appliances' },
-      { id: 3, name: 'Dummy Product 3', price: 300, category: 'Furniture' },
-      { id: 4, name: 'Dummy Product 4', price: 150, category: 'Books' },
-      { id: 5, name: 'Dummy Product 5', price: 50, category: 'Clothing' },
+      {
+        id: 1,
+        title: 'Dummy Product 1',
+        description: 'This is a dummy product description.',
+        price: 10.0,
+        thumbnail: 'https://via.placeholder.com/150',
+        rating: { rate: 4.5, count: 10 },
+      },
+      {
+        id: 2,
+        title: 'Dummy Product 2',
+        description: 'This is another dummy product description.',
+        price: 20.0,
+        thumbnail: 'https://via.placeholder.com/150',
+        rating: { rate: 3.8, count: 5 },
+      },
+      // Add more dummy products as needed
     ];
   }
 }

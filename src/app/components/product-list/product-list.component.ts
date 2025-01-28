@@ -11,96 +11,78 @@ import { ProductCardComponent } from '../product-card/product-card.component';
   styleUrls: ['./product-list.component.css'],
 })
 export class ProductListComponent implements OnInit {
-  products: any[] = [];
   displayedProducts: any[] = []; // Products currently displayed
-  isLoading = false;
-  itemsPerPage = 10; // Number of items to load per "page"
-  currentPage = 0;
+  isLoading = false; // Prevent multiple API calls
+  itemsPerPage = 10; // Number of items to load per page
+  currentPage = 1; // Current page (starts at 1 for most APIs)
+  totalProducts = 0; // Total products available (fetched from API)
+  hasMoreProducts = true; // Check if there are more products to load
+
   isModalVisible = false; 
-  selectedProduct = {
-    name: '',
-    description: '',
-    title: '',
-    image: '',
-    rating: {
-      rate:'',
-      count:''
-    }
-  }
+  selectedProduct :any
 
   constructor(private productService: ProductService) {}
 
   ngOnInit(): void {
-    this.fetchProducts();
+    this.loadMoreProducts(); // Fetch initial products
   }
 
-  fetchProducts(): void {
-    this.isLoading = true;
-    this.productService.getProducts().subscribe({
-      next: (data) => {
-        this.products = data;
-        this.loadMoreProducts(); // Load initial products
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-        alert('Failed to load products!');
-      },
-    });
-  }
-
+  // Fetch products from the API with pagination
   loadMoreProducts(): void {
-    const nextPage = this.products.slice(
-      this.currentPage * this.itemsPerPage,
-      (this.currentPage + 1) * this.itemsPerPage
-    );
-    this.displayedProducts.push(...nextPage);
-    this.currentPage++;
+    if (this.isLoading || !this.hasMoreProducts) return;
+
+    this.isLoading = true; // Set loading flag
+    this.productService
+      .getProducts(this.currentPage, this.itemsPerPage) // Add page and limit to API call
+      .subscribe({
+        next: (data: any) => {
+          this.displayedProducts.push(...data.products); // Append new products
+          this.totalProducts = data.total; // Update total product count (if provided by the API)
+          this.currentPage++; // Increment page
+          this.hasMoreProducts = this.displayedProducts.length < this.totalProducts;
+          this.isLoading = false; // Reset loading flag
+        },
+        error: () => {
+          this.isLoading = false; // Reset loading flag on error
+          alert('Failed to load products!');
+        },
+      });
   }
 
+  // Detect when the user scrolls near the bottom of the page
   @HostListener('window:scroll', ['$event'])
   onScroll(): void {
     const threshold = 300; // Trigger load when 300px from bottom
     const position = window.innerHeight + window.scrollY;
     const height = document.body.scrollHeight;
 
-    if (position >= height - threshold && !this.isLoading) {
+    if (position >= height - threshold && !this.isLoading && this.hasMoreProducts) {
       this.loadMoreProducts();
     }
   }
 
-  
+  // Sorting function
   onSortChange(sortBy: string): void {
     if (sortBy === 'priceAsc') {
       this.displayedProducts.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'priceDesc') {
       this.displayedProducts.sort((a, b) => b.price - a.price);
-    }
-    else if (sortBy === 'ratingAsc') {
-      this.displayedProducts.sort((a, b) => a.rating.rate - b.rating.rate);
-    }
-    else if (sortBy === 'ratingDesc') {
-      this.displayedProducts.sort((a, b) => b.rating.rate - a.rating.rate);
+    } else if (sortBy === 'ratingAsc') {
+      this.displayedProducts.sort((a, b) => a.rating - b.rating);
+    } else if (sortBy === 'ratingDesc') {
+      this.displayedProducts.sort((a, b) => b.rating - a.rating);
     }
   }
 
+  // Show modal
   showModal(product: any) {
     this.selectedProduct = product;
     this.isModalVisible = true;
   }
 
-  // Hide the modal
+  // Hide modal
   hideModal() {
     this.isModalVisible = false;
-    this.selectedProduct =  {
-    name: '',
-    description: '',
-    title: '',
-    image: '',
-    rating: {
-    rate:'',
-      count:''
-    }
+    this.selectedProduct = undefined
   }
-}
 }

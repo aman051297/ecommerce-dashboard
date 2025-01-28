@@ -1,11 +1,20 @@
 <div class="product-list">
+  <!-- Product Cards -->
   <app-product-card
-    *ngFor="let product of displayedProducts" (click)="showModal(product)"
+    *ngFor="let product of displayedProducts"
+    (click)="showModal(product)"
     [product]="product"
   ></app-product-card>
 </div>
+
+<!-- Loading Spinner -->
 <div *ngIf="isLoading" class="loading-spinner">
   Loading more products...
+</div>
+
+<!-- End of Products Message -->
+<div *ngIf="!hasMoreProducts && !isLoading" class="end-of-products">
+  <p>No more products to load.</p>
 </div>
 
 <!-- Modal -->
@@ -14,8 +23,11 @@
     <span class="close" (click)="hideModal()">&times;</span>
     <h2>Product: {{ selectedProduct.title }}</h2>
     <p><b>Description: </b>{{ selectedProduct.description }}</p>
-    <p><b>Rating: </b>{{ selectedProduct.rating.rate }} <sub>By {{ selectedProduct.rating.count }} <sup>Customers</sup> </sub></p>
-    <img  class="product-image" [src]="selectedProduct.image" alt="Product Image" />
+    <p>
+      <b>Rating: </b>{{ selectedProduct.rating }}
+      <!-- <sub>By {{ selectedProduct.rating.count }} <sup>Customers</sup></sub> -->
+    </p>
+    <img class="product-image" [src]="selectedProduct.images[0]" alt="Product Image" />
     <button (click)="hideModal()">Close</button>
   </div>
 </div>

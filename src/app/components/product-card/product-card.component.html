@@ -1,7 +1,9 @@
 <div class="product-card">
-    <img [src]="product.image" alt="{{ product.title }}" />
-    <h3>{{ product.title }}</h3>
-    <p>Price: ${{ product.price }}</p>
+    <img [src]="product.images[0]" alt="{{ product.title }}" />
+    <h3>{{ product.title }} <br> By <b>{{product.brand}}</b></h3>
+    <p>Price: ${{ product.price }}       <sub>Off {{ product.discountPercentage }} % <sup></sup></sub>
+    </p>
     <p>{{ product.category }}</p>
+    <p>Available: {{ product?.stock }}</p>
   </div>
   
